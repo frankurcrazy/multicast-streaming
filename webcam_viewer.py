@@ -29,8 +29,15 @@ class GTK_Main:
 		
 		#self.player = Gst.parse_launch("v412src ! autovideosink")
 		#self.player = Gst.parse_launch("autovideosrc ! autovideosink")
-		self.player = Gst.parse_launch("ksvideosrc device-index=0 ! videoconvert ! autovideosink")
 		
+		self.player = Gst.parse_launch("ksvideosrc device-index=0 ! videoconvert ! autovideosink")
+
+		#self.player = Gst.parse_launch("audiokaraoke ! audioconvert ! directsoundsink") #no real random source present
+
+		self.player2 = Gst.parse_launch("autoaudiosrc ! audioconvert ! directsoundsink") #directsoundsrc cannot work with ksvideosrc concurrently
+		
+		#self.player = Gst.parse_launch("directsoundsrc ! audioconvert ! directsoundsink") #directsoundsrc cannot work with ksvideosrc concurrently		
+
 		#self.player = Gst.parse_launch("autovideosrc ! d3dvideosink")
 		bus = self.player.get_bus()
 		bus.add_signal_watch()
@@ -42,8 +49,10 @@ class GTK_Main:
 		if self.button.get_label() == "Start":
 			self.button.set_label("Stop")
 			self.player.set_state(Gst.State.PLAYING)
+			self.player2.set_state(Gst.State.PLAYING)
 		else:
 			self.player.set_state(Gst.State.NULL)
+			self.player2.set_state(Gst.State.NULL)
 			self.button.set_label("Start")
 			
 	def exit(self, widget, date=None):

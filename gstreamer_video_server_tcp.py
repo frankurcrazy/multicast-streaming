@@ -2,8 +2,9 @@ import sys, os
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GObject, Gtk
-
 from gi.repository import GdkX11, GstVideo
+
+import argparse
 
 def new_decode_pad(dbin, pad):
 	if pad.get_name() == "src_0":
@@ -20,7 +21,7 @@ class GTK_Main(object):
 	audio_convert = ''
 	video_convert = ''
 
-	def __init__(self):
+	def __init__(self, IP, recv_port):
 		window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
 		window.set_title("Server")
 		window.set_default_size(500, 400)
@@ -32,8 +33,8 @@ class GTK_Main(object):
 		 
 		tcpsrc = Gst.ElementFactory.make("tcpserversrc", "source")
 		pipeline.add(tcpsrc)
-		tcpsrc.set_property("host", "127.0.0.1")
-		tcpsrc.set_property("port", 3000)
+		tcpsrc.set_property("host", IP)
+		tcpsrc.set_property("port", recv_port)
 		 
 		decode = Gst.ElementFactory.make("decodebin", "decode")
 		decode.connect("pad-added", new_decode_pad)
@@ -54,8 +55,13 @@ class GTK_Main(object):
 		 
 		pipeline.set_state(Gst.State.PLAYING)
 
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser( description = "IP RECV_PORT" )
+	parser.add_argument("ip", help="specify relay server IP")
+	parser.add_argument("recv_port", help="specify recving port", type=int)
+	args = parser.parse_args()
 
-GObject.threads_init()
-Gst.init(None)
-GTK_Main()
-Gtk.main()
+	GObject.threads_init()
+	Gst.init(None)
+	GTK_Main(args.ip, args.recv_port)
+	Gtk.main()
